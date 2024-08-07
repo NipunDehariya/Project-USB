@@ -1,0 +1,21 @@
+1. Create the DataBase - User and Logs
+
+2. Login Page Welcome to App (Same Dimensions),
+
+3. Two Pages - User and Admin Dashboard
+
+4. User - Only ENABLE Button - Default Buttons are Visible then permission is checked
+User Activity Log, Display the Logs, User Access Control, User Activity Log, User Login/Logout Time
+
+5. Admin - ENABLE and DISABLE Buttons, Display the User Activity Logs, Admin Login/Logout Time, 
+Enable/Disable the User Access, Display the User Logs, User Access Control, User Login/Logout Time
+
+6. User when clicks ENABLE - A window should pop and Two Buttons (Also a Disabled Enable Button) 
+- Confirm Location (Toggle Type) and Check Permissions (Time, Location, Access)
+[if granted then a tick should appear and Enable Button should be active]
+
+7. Improve the HTML file
+
+uuid, using list comprehension, and the random module to generate a list of 10 UUIDs.
+
+yt for relationsips - https://www.youtube.com/watch?v=lgiQLBwPmTQ&t=1583s
