@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 from ..models.user import User
 from .AdminPage import AdminPage
+from .UserPage import UserPage
 
 import os
 os.chdir(os.path.dirname(__file__))
@@ -11,6 +12,7 @@ os.chdir(os.path.dirname(__file__))
 default_dir = os.path.join(os.getcwd(), "assets")
 
 class LoginPage:
+
     def __init__(self, root, session):
         self.session = session
         self.root = root
@@ -42,7 +44,7 @@ class LoginPage:
 
 
         # Create a style
-        style = ttk.Style(self.root)
+        ttk.Style(self.root)
         # Import the tcl file
         self.root.tk.call("source", "assets/forest-dark.tcl")
         ttk.Style().theme_use("forest-dark")
@@ -106,8 +108,10 @@ class LoginPage:
             if user.is_admin:
                 messagebox.showinfo("Login Successful", "Welcome Admin! 😀")
                 self.open_admin_window()
+                
             else:
-                messagebox.showinfo("Login Successful", "Welcome User! 😀")
+                # messagebox.showinfo("Login Successful", "Welcome User! 😀")
+                self.open_user_window(user)
         else:
             messagebox.showerror("Login Failed", "Invalid username or password 🚫")
     
@@ -115,5 +119,10 @@ class LoginPage:
         self.root.destroy()
         admin_root = tk.Tk()
         AdminPage(admin_root, self.session)
+
+    def open_user_window(self, user):
+        self.root.destroy()
+        user_root = tk.Tk()
+        UserPage(user_root, self.session, user)
 
         # self.root.mainloop()

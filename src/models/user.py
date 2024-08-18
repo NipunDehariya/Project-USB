@@ -97,12 +97,12 @@ def delete_user(username):
 #     longitude='24.567'
 # )
 # add_user(
-#     name='User',
-#     username='user1',
+#     name='Aditya',
+#     username='user2',
 #     password='user123',
 #     email='user@email.com',
 #     is_admin=False,
-#     permitted=True,
+#     permitted=False,
 #     permitted_from=datetime.now(),
 #     permitted_to=datetime.now(),
 #     latitude='23.456',
