@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-from ..models.user import User
+from ..models.user import User, Log
 from .AdminPage import AdminPage
 from .UserPage import UserPage
+import datetime
+import socket
 
 import os
 os.chdir(os.path.dirname(__file__))
@@ -78,7 +80,7 @@ class LoginPage:
         self.password_entry.grid(row=4, column=0, padx=5, pady=(0, 10), sticky="ew")
 
         # Login button
-        login_button = ttk.Button(widgets_frame, text="Login", style="Accent.TButton", cursor="hand2", command=self.login)
+        login_button = ttk.Button(widgets_frame, text="Login", style="Accent.TButton", cursor="hand2", command=self.login, takefocus=True)
         login_button.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
 
         # Load and display an image
@@ -105,9 +107,16 @@ class LoginPage:
         user = self.session.query(User).filter_by(username=username).first()
 
         if user and user.password == password:
+            hostname = socket.gethostname()
+            ip_address = str(socket.gethostbyname(hostname))
+
+            log = Log(user_id=user.id, login=datetime.datetime.now(), ip=ip_address)
+            self.session.add(log)
+            self.session.commit()
+
             if user.is_admin:
-                messagebox.showinfo("Login Successful", "Welcome Admin! 😀")
-                self.open_admin_window()
+                messagebox.showinfo("Login Successful", "Welcome Admin!")
+                self.open_admin_window(user)
                 
             else:
                 # messagebox.showinfo("Login Successful", "Welcome User! 😀")
@@ -115,10 +124,10 @@ class LoginPage:
         else:
             messagebox.showerror("Login Failed", "Invalid username or password 🚫")
     
-    def open_admin_window(self):
+    def open_admin_window(self, user):
         self.root.destroy()
         admin_root = tk.Tk()
-        AdminPage(admin_root, self.session)
+        AdminPage(admin_root, self.session, user)
 
     def open_user_window(self, user):
         self.root.destroy()

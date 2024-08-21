@@ -1,7 +1,7 @@
-import threading
+# import threading
 import tkinter as tk
 from src.gui.LoginPage import LoginPage
-from src.controllers import geolocation_server
+# from src.controllers import geolocation_server
 from src.models.user import session
 
 # def run_server():

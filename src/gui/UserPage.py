@@ -1,12 +1,14 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-from ..models.user import User
+from ..models.user import User, Log
 import webbrowser
 import json
+import datetime
 import urllib.parse as urlparse
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from sqlalchemy.orm.exc import NoResultFound
 from geopy.geocoders import Nominatim
 import threading
 
@@ -45,6 +47,7 @@ class UserPage():
         self.root.rowconfigure(index=0, weight=1)
         self.root.rowconfigure(index=1, weight=1)
         self.root.rowconfigure(index=2, weight=1)
+        self.root.rowconfigure(index=5, weight=1)
 
 
         # Create a style
@@ -66,12 +69,13 @@ class UserPage():
         button = ttk.Button(widgets_frame, text="Enable USB", command=self.check_permissions)           # Add Command to enable the usb
         button.grid(row=2, column=0, padx=5, pady=10, sticky="nsew") 
 
-
+        button = ttk.Button(widgets_frame, text="Logout", style="Accent.TButton", command=self.logout)           # Logout and Store Log
+        button.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
                         # LOGS
         
         
         # Panedwindow
-        label = ttk.Label(widgets_frame, text="User Logs", justify="center")
+        label = ttk.Label(widgets_frame, text="User Analytics and Logs", justify="center")
         label.grid(row=0, column=2, pady=10, columnspan=2)
 
         paned = ttk.PanedWindow(root)
@@ -90,21 +94,56 @@ class UserPage():
         treeScroll.pack(side="right", fill="y")
 
         # Treeview
-        treeview = ttk.Treeview(treeFrame, selectmode="extended", yscrollcommand=treeScroll.set, columns=(1, 2), height=12)
-        treeview.pack(expand=True, fill="both")
-        treeScroll.config(command=treeview.yview)
+        
+        columns = ("user_id", "login", "logout", "duration", "ip")
+        names = ("Username", "Login Time", "Logout Time", "Duration", "IP Address")
+        # tree = ttk.Treeview(treeFrame, columns=columns, show='headings')
+        tree = ttk.Treeview(treeFrame, selectmode="extended", yscrollcommand=treeScroll.set, columns=columns, show='headings', height=12)
+        tree.pack(expand=True, fill="both")
+        treeScroll.config(command=tree.yview)
 
-        # Treeview columns
-        treeview.column("#0", width=120)
-        treeview.column(1, anchor="w", width=120)
-        treeview.column(2, anchor="w", width=120)
+        for column in columns:
+            tree.column(column, width=100)
 
-        # Treeview headings
-        treeview.heading("#0", text="Column 1", anchor="center")
-        treeview.heading(1, text="Column 2", anchor="center")
-        treeview.heading(2, text="Column 3", anchor="center")
+        for name, columns in zip(names, columns):
+            tree.heading(columns, text=name)
+        
+        logs = self.session.query(Log).join(User).filter(User.is_admin == False).all()
+        for log in logs:
+            tree.insert("", "end", values=(log.user.username, log.login, log.logout, log.duration, log.ip))
+        
+        tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
         self.root.mainloop()
+
+    def logout(self):
+        self.root.destroy()
+        logout_time = datetime.datetime.now()
+    
+        # user_id = self.session.query(User.id).filter_by(username=self.current_user).scalar()
+        user_id = self.current_user.id
+        
+        if user_id is None:
+                raise NoResultFound("No user found with the given username.")
+
+        log_entry = self.session.query(Log).filter_by(user_id=user_id).order_by(Log.login.desc()).limit(1).first()
+        login_time = log_entry.login if log_entry else None
+        
+        # Calculate the duration
+        duration = logout_time - login_time
+        
+        # Insert a new record into the Log table
+        log_entry.logout_time=logout_time
+        log_entry.duration=duration
+        # self.session.add(log_entry)
+        self.session.commit()
+        self.current_user = None
+        self.logged_in_user = None
+
+        # Deferred import to avoid circular import error
+        from .LoginPage import LoginPage
+        login_root = tk.Tk()
+        LoginPage(login_root, self.session)
 
     def check_permissions(self):
         chk_root = tk.Toplevel(self.root)
@@ -178,7 +217,7 @@ class Checks:
         if self.location_data:
             print("Location data found:", self.location_data)
             messagebox.showinfo("User Location", f"User Location Received : {self.location_data['address']}", parent=self.root)
-            self.location_tick.config(text="✔")
+            self.location_tick.config(text="✅✔️") if self.compare_location() else self.location_tick.config(text="❌")
             return
         else:
             print("no res")
