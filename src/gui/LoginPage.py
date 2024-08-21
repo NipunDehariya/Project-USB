@@ -1,99 +1,82 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PIL import Image, ImageTk
 from ..models.user import User
 from .AdminPage import AdminPage
-
-import os
-os.chdir(os.path.dirname(__file__))
-
-# Set the default directory to the assets folder
-default_dir = os.path.join(os.getcwd(), "assets")
 
 class LoginPage:
     def __init__(self, root, session):
         self.session = session
         self.root = root
-        self.root.title("User Login")
-        self.root.option_add("*tearOff", False) # This is always a good idea
-
-        # Get screen width and height
-        screen_width = root.winfo_screenwidth()
-        screen_height = root.winfo_screenheight()
+        self.root.title("USB-Login")
+        self.root.option_add("*tearOff", False)
 
         # Set window size to half of the screen size
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
         window_width = screen_width // 2
         window_height = screen_height // 2
-
-        # Calculate position to center the window
         position_right = screen_width // 4
         position_down = screen_height // 4
+        self.root.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
 
-        # Set the geometry of the window
-        root.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
-
-        # Make the app responsive
-        self.root.columnconfigure(index=0, weight=1)
-        self.root.columnconfigure(index=1, weight=1)
-        self.root.columnconfigure(index=2, weight=1)
-        self.root.rowconfigure(index=0, weight=1)
-        self.root.rowconfigure(index=1, weight=1)
-        self.root.rowconfigure(index=2, weight=1)
-
-
-        # Create a style
+        # Apply a theme for a modern look
         style = ttk.Style(self.root)
-        # Import the tcl file
-        self.root.tk.call("source", "assets/forest-dark.tcl")
-        ttk.Style().theme_use("forest-dark")
+        style.theme_use("clam")
 
+        # Customize the styling
+        cyberpunk_font = ("Courier New", 15, "bold")  # Default Cyberpunk-style font
+        heading_font = ("Courier New",22, "bold")    # Larger font for heading
+        text_color = "#FFA500"  # Orange text color
+        background_color = "#001219"  # Dark background color
 
-        # Create a frame for input widgets
-        widgets_frame = ttk.Frame(root, padding=(10, 10, 10, 10))
-        widgets_frame.grid(row=0, column=1, padx=10, pady=(30, 10), sticky="nsew", rowspan=3)
-        widgets_frame.columnconfigure(index=0, weight=1)
+        # Set the background color for the root window
+        self.root.configure(bg=background_color)
+
+        # Label style
+        style.configure("Cyberpunk.TLabel", foreground=text_color, background=background_color, font=cyberpunk_font)
+
+        # Heading style with larger font
+        style.configure("Cyberpunk.Heading.TLabel", foreground=text_color, background=background_color, font=heading_font)
+
+        # Entry style - larger size and black text
+        style.configure("Cyberpunk.TEntry", foreground="#000000", background="#333333", font=cyberpunk_font, padding=10)
+
+        # Button style
+        style.configure("Cyberpunk.TButton", foreground=text_color, background="#333333", font=cyberpunk_font, padding=10)
+        style.map("Cyberpunk.TButton", background=[("active", text_color), ("pressed", text_color)], foreground=[("active", "#000000"), ("pressed", "#000000")])
 
         # Heading
-        head = ttk.Label(widgets_frame, text="Login into your Account", font="Georgia")
-        head.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="w")
+        head = ttk.Label(self.root, text="Admin/User Login", style="Cyberpunk.Heading.TLabel", anchor="center")
+        head.grid(row=0, column=0, padx=10, pady=20, sticky="ew")
 
         # Username label
-        username_label = ttk.Label(widgets_frame, text="Username:")
-        username_label.grid(row=1, column=0, padx=5, pady=(20, 0), sticky="w")
+        username_label = ttk.Label(self.root, text="Username:", style="Cyberpunk.TLabel")
+        username_label.grid(row=1, column=0, padx=10, pady=(20, 0), sticky="w")
 
-        # Username entry
-        self.username_entry = ttk.Entry(widgets_frame)
-        # username_entry.insert(0, "Enter Username")
-        self.username_entry.grid(row=2, column=0, padx=5, pady=(0, 10), sticky="ew")
+        # Username entry - larger and black text
+        self.username_entry = ttk.Entry(self.root, style="Cyberpunk.TEntry", width=40)
+        self.username_entry.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ew")
 
         # Password label
-        password_label = ttk.Label(widgets_frame, text="Password:")
-        password_label.grid(row=3, column=0, padx=5, pady=(10, 0), sticky="w")
+        password_label = ttk.Label(self.root, text="Password:", style="Cyberpunk.TLabel")
+        password_label.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="w")
 
-        # Password entry
-        self.password_entry = ttk.Entry(widgets_frame, show="⭐")
-        # password_entry.insert(0, "Enter Password")
-        self.password_entry.grid(row=4, column=0, padx=5, pady=(0, 10), sticky="ew")
+        # Password entry - larger and black text
+        self.password_entry = ttk.Entry(self.root, show="●", style="Cyberpunk.TEntry", width=40)
+        self.password_entry.grid(row=4, column=0, padx=10, pady=(0, 20), sticky="ew")
 
-        # Login button
-        login_button = ttk.Button(widgets_frame, text="Login", style="Accent.TButton", cursor="hand2", command=self.login)
-        login_button.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
+        # Login button with cyberpunk style
+        login_button = ttk.Button(self.root, text="Login", style="Cyberpunk.TButton", cursor="hand2", command=self.login)
+        login_button.grid(row=5, column=0, padx=10, pady=20, sticky="nsew")
 
-        # Load and display an image
-        image = Image.open("assets/login.webp")
-        image = image.resize((210, 210))
-        photo = ImageTk.PhotoImage(image)
-
-        image_label = ttk.Label(root, image=photo)
-        image_label.image = photo  # Keep a reference to avoid garbage collection
-        image_label.grid(row=0, column=0, padx=10, pady=(30, 10), sticky="nsew", rowspan=3)
-
-        # Sizegrip
-        sizegrip = ttk.Sizegrip(self.root)
-        sizegrip.grid(row=100, column=100, padx=(0, 5), pady=(0, 5))
-
-        # Set a minsize for the window, and place it in the middle
-        self.root.update()
+        # Make the app responsive
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        self.root.rowconfigure(1, weight=1)
+        self.root.rowconfigure(2, weight=1)
+        self.root.rowconfigure(3, weight=1)
+        self.root.rowconfigure(4, weight=1)
+        self.root.rowconfigure(5, weight=1)
 
     def login(self):
         username = self.username_entry.get()
@@ -104,16 +87,14 @@ class LoginPage:
 
         if user and user.password == password:
             if user.is_admin:
-                messagebox.showinfo("Login Successful", "Welcome Admin! 😀")
+                messagebox.showinfo("Login Successful", "Welcome Admin!")
                 self.open_admin_window()
             else:
-                messagebox.showinfo("Login Successful", "Welcome User! 😀")
+                messagebox.showinfo("Login Successful", "Welcome User!")
         else:
-            messagebox.showerror("Login Failed", "Invalid username or password 🚫")
-    
+            messagebox.showerror("Login Failed", "Invalid username or password")
+
     def open_admin_window(self):
         self.root.destroy()
         admin_root = tk.Tk()
         AdminPage(admin_root, self.session)
-
-        # self.root.mainloop()
