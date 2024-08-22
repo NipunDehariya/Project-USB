@@ -3,8 +3,8 @@
 ### Setup the Environment
 pip install uv\
 uv venv\
-.venv\Scripts\activate\
-uv pip sync requirements.txt
+activate
+uv pip install -r requirements.txt
 
 ### To Run the App
 python main.py

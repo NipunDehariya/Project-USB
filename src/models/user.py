@@ -1,7 +1,6 @@
-from sqlalchemy import create_engine, Column, String, Boolean, DateTime
+from sqlalchemy import create_engine, Column, String, Boolean, DateTime, ForeignKey, Interval
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from datetime import datetime
 import uuid
 
 # Define the base class for the model
@@ -26,6 +25,8 @@ class User(Base):
     latitude = Column("lat", String)
     longitude = Column("long", String)
 
+    logs = relationship("Log", back_populates="user")
+
     def __init__(self, name, username, password, email, is_admin, permitted, permitted_from, permitted_to, latitude, longitude):
         self.name = name
         self.username = username
@@ -40,6 +41,21 @@ class User(Base):
 
     # Relationship to the Log model
     # logs = relationship("Log", back_populates="user") 
+
+
+class Log(Base):
+    __tablename__ = 'logs'
+    
+    log_id = Column("LogID", String, primary_key=True, default=generate_id)
+    user_id = Column("UserID", String, ForeignKey('users.UserID'), nullable=False)
+    login = Column("Login", DateTime)
+    logout = Column("Logout", DateTime)
+    duration = Column("Duration",Interval)
+    ip = Column("IP Address",String)
+    # location = Column("Location", String)
+    
+    # Relationship to the User model
+    user = relationship("User", back_populates="logs")
 
 # Create an SQLite database
 engine = create_engine('sqlite:///users.db')
@@ -97,12 +113,12 @@ def delete_user(username):
 #     longitude='24.567'
 # )
 # add_user(
-#     name='User',
-#     username='user1',
+#     name='Aditya',
+#     username='user2',
 #     password='user123',
 #     email='user@email.com',
 #     is_admin=False,
-#     permitted=True,
+#     permitted=False,
 #     permitted_from=datetime.now(),
 #     permitted_to=datetime.now(),
 #     latitude='23.456',
