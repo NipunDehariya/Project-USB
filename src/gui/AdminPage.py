@@ -36,7 +36,7 @@ class AdminPage():
         root.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
         
         # Use sv_ttk for a more modern look
-        sv_ttk.set_theme("light")
+        sv_ttk.set_theme("dark")
 
         self.create_widgets()
 
@@ -241,8 +241,8 @@ class AdminPage():
         # Deferred import to avoid circular import error
         from .LoginPage import LoginPage
         login_root = tk.Tk()
-        ttk.Style(self.root)
-        self.root.tk.call("source", "assets/forest-light.tcl")
+        ttk.Style(login_root)
+        login_root.tk.call("source", "assets/forest-light.tcl")
     
         LoginPage(login_root, self.session)
 
