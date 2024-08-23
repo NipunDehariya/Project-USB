@@ -88,7 +88,7 @@ class LoginPage:
         login_button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
 
         # Load and display an image
-        image = Image.open("assets/loginn.jpg")
+        image = Image.open("assets/login.jpg")
         # image = image.resize((320, 540))
         photo = ImageTk.PhotoImage(image)
 
