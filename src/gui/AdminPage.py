@@ -36,22 +36,28 @@ class AdminPage():
         root.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
         
         # Use sv_ttk for a more modern look
-        sv_ttk.set_theme("dark")
+        ttk.Style(self.root)
+        # Import the tcl file
+        self.root.tk.call("source", "assets/forest-dark.tcl")
+        ttk.Style().theme_use("forest-dark")
+
+        # Create a new style for simple borders
+        style = ttk.Style()
+        style.configure("Divider.TFrame", borderwidth=1, relief="solid", background="#5e5c5c")
 
         self.create_widgets()
 
     def create_widgets(self):
         # Main frame
         main_frame = ttk.Frame(self.root)
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Sidebar
-        sidebar = ttk.Frame(main_frame, width=200, style="Card.TFrame")
-        sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
-        
+        sidebar = ttk.Frame(main_frame, width=200, style="SimpleBorder.TFrame")
+        sidebar.pack(side=tk.LEFT, fill=tk.Y)
 
         # Sidebar title
-        ttk.Label(sidebar, text="Dashboard", style="h1.TLabel").pack(pady=10)
+        ttk.Label(sidebar, text="Dashboard", style="h1.TLabel", font=('montserrat semibold', 16)).pack(pady=10)
 
         # Sidebar buttons
         buttons = [
@@ -64,9 +70,14 @@ class AdminPage():
         for text, command in buttons:
             ttk.Button(sidebar, text=text, command=command, style="Accent.TButton", width=10).pack(pady=5, padx=25, fill=tk.X)
 
-        ttk.Button(sidebar, text="Logout", command=self.logout, style="TButton", width=10).pack(pady=55, padx=25, fill=tk.X)
+        ttk.Button(sidebar, text="Logout", command=self.logout, style="TButton", width=12).pack(pady=(6,50), padx=25, fill=tk.X)
+
+        # Divider frame
+        divider = ttk.Frame(main_frame, style="Divider.TFrame")
+        divider.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 5))
+
         # Main content area
-        self.content = ttk.Frame(main_frame, style="Card.TFrame")
+        self.content = ttk.Frame(main_frame)
         self.content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Initial content
@@ -74,8 +85,8 @@ class AdminPage():
 
     def show_home(self):
         self.clear_content()
-        ttk.Label(self.content, text="Welcome to the Admin Dashboard", style="h1.TLabel").pack(pady=20)
-        ttk.Label(self.content, text="Here's an overview of your system:", style="TLabel").pack(pady=10)
+        ttk.Label(self.content, text="Welcome to the Admin Dashboard", style="h1.TLabel", font=('montserrat semibold', 14)).pack(pady=20)
+        ttk.Label(self.content, text="Here's an overview of your system:", style="TLabel", font=('montserrat', 12)).pack(pady=15)
 
         # Sample stats
         stats = [
@@ -86,7 +97,7 @@ class AdminPage():
         ]
 
         for title, value in stats:
-            frame = ttk.Frame(self.content, style="Card.TFrame")
+            frame = ttk.Frame(self.content, style="SimpleBorder.TFrame")
             frame.pack(pady=10, padx=20, fill=tk.X)
             ttk.Label(frame, text=title, style="TLabel").pack(side=tk.LEFT, padx=10)
             ttk.Label(frame, text=value, style="h2.TLabel").pack(side=tk.RIGHT, padx=10)
@@ -101,8 +112,8 @@ class AdminPage():
         for column in columns:
             tree.column(column, width=100)
 
-        for name, columns in zip(names, columns):
-            tree.heading(columns, text=name)
+        for name, column in zip(names, columns):
+            tree.heading(column, text=name)
         
         # Insert data
         logs = self.session.query(Log).all()
@@ -141,7 +152,6 @@ class AdminPage():
         
         # Add user button
         ttk.Button(self.content, text="Add User", command=self.add_user_form).pack(pady=20)
-
 
     def delete_user(self, user):
         # Delete user from the database
@@ -205,7 +215,6 @@ class AdminPage():
 
         ttk.Button(scrollable_frame, text="Add", command=add_user).grid(row=len(fields), column=0, columnspan=2, pady=20)
 
-
     def show_settings(self):
         self.clear_content()
         ttk.Label(self.content, text="Settings", style="h1.TLabel").pack(pady=20)
@@ -220,23 +229,19 @@ class AdminPage():
         logout_time = datetime.datetime.now()
 
         user_id = self.current_user.id
-        print(user_id)
         if user_id is None:
-                raise NoResultFound("No user found with the given username.")
+            raise NoResultFound("No user found with the given username.")
 
         log_entry = self.session.query(Log).filter_by(user_id=user_id).order_by(Log.login.desc()).limit(1).first()
-        print(log_entry.login)
         login_time = log_entry.login if log_entry else None
         
         # Calculate the duration
         duration = logout_time - login_time
         
-        log_entry.logout_time=logout_time
-        log_entry.duration=duration
-        # self.session.add(log_entry)
+        log_entry.logout_time = logout_time
+        log_entry.duration = duration
         self.session.commit()
         self.current_user = None
-        self.logged_in_user = None
 
         # Deferred import to avoid circular import error
         from .LoginPage import LoginPage
@@ -247,5 +252,8 @@ class AdminPage():
         LoginPage(login_root, self.session)
 
 if __name__ == "__main__":
-    app = AdminPage()
-    app.mainloop()
+    root = tk.Tk()
+    session = None  # Replace with your SQLAlchemy session
+    user = None  # Replace with the current user object
+    app = AdminPage(root, session, user)
+    root.mainloop()
