@@ -1,5 +1,5 @@
 ## PROJECT- USB Physical Security for PC
-![Alt text](src/gui/assets/readme.gif?width=531&height=354)
+![Alt text](src/gui/assets/readm.gif?width=531&height=354)
 
 ### Setup the Environment
 pip install uv\
@@ -26,11 +26,11 @@ python main.py
 
 
 ### Additional
-1. [Project Report]()
-2. [Project PPT]()
-3. [Internship Report]()
-4. [Task Report]()
-5. [The Team]()
+1. [Project Report](src/gui/assets/pr.pdf)
+2. [Project PPT](src/gui/assets/pp.pdf)
+3. [Internship Report](src/gui/assets/ir.pdf)
+4. [Task Report](src/gui/assets/tr.pdf)
+5. [The Team](src/gui/assets/Dev.jpg)
 
 
 
