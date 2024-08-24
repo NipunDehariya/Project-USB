@@ -1,1 +1,12 @@
-True
+add_user(
+    name='Niket',
+    username='user3',
+    password='user123',
+    email='user3@email.com',
+    is_admin=False,
+    permitted=True,
+    permitted_from=datetime.datetime.now(),
+    permitted_to=datetime.datetime.now(),
+    latitude='23.254',
+    longitude='77.399'
+)

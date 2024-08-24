@@ -21,9 +21,11 @@ uuid, using list comprehension to generate a list of 10 UUIDs., and the random m
 yt for relationsips - https://www.youtube.com/watch?v=lgiQLBwPmTQ&t=1583s
 
 ---OBJECTIVES---
-Tkinter and HTML Beautification
-Admin Page
-Logs DataBase - Make it partially (manual) 
+PDF and Dev Image
+Readme
+Tkinter and HTML Beautification ✅
+Admin Page ✅
+Logs DataBase - Make it partially (manual) ✅
 Permissions Fetched and Validated ✅
 Location Fetched ✅
 Location Validated ✅

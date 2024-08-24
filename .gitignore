@@ -1,5 +1,7 @@
-# objective.yaml
+objective.yaml
 src/__pycache__/
-src/controllers/__pycache__
-src/models/__pycache__
-src/gui/__pycache__
+src/gui/__pycache__/
+src/models/__pycache__/
+users.db
+__pycache__/
+*.pyc

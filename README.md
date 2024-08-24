@@ -1,35 +1,36 @@
 ## PROJECT- USB Physical Security for PC
+![Alt text](src/gui/assets/readme.gif?width=531&height=354)
 
 ### Setup the Environment
 pip install uv\
 uv venv\
-activate
+.venv\Scripts\activate\
 uv pip install -r requirements.txt
 
 ### To Run the App
 python main.py
 
-### Suggested Features
-
-- Project Info pdf-> Start, Dev Details, SWOT Analysis etc...
-- RBAC (Role Based Authentication - Admin/User)
-- Geofencing for USB Access (Alerts for access outside allowed areas)
+### Current Features
+- Role Based Access Control (RBAC - Admin/User)
+- Geofencing for USB Access 
 - Dynamic USB Port Disabling (Based on Time and Policy)
-- Auditing and Logs
+- Auditing and Logs (SQLite)
+
+
+### Future Enhancements
+- Alerts for access outside allowed areas
 - USB Device Authentication - Biometric
 - USB device whitelisting
 - Secure Boot
-- Windows/Linux/Mac
-- Prometheus- Alerting / Grafana- Visualization of Logs
-- Security for USB to Access it
+- Alerting and Visualization of Logs
 
 
 ### Additional
-1. Project Report (Individual) - Format
-2. Project PPT (Group)
-3. Internship Report - What you did in internship
-4. Task Report - Combined
-5. Working Project
+1. [Project Report]()
+2. [Project PPT]()
+3. [Internship Report]()
+4. [Task Report]()
+5. [The Team]()
 
 
 

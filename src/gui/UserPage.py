@@ -1,15 +1,16 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PIL import Image, ImageTk
 from ..models.user import User, Log
 import webbrowser
-import json
 import datetime
+from PIL import Image, ImageTk
 import urllib.parse as urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from sqlalchemy.orm.exc import NoResultFound
 from geopy.geocoders import Nominatim
 import threading
+import subprocess
+
 import os
 os.chdir(os.path.dirname(__file__))
 
@@ -23,6 +24,7 @@ class UserPage():
         self.current_user = user
         self.root.title("User Dashboard")
         self.root.option_add("*tearOff", False)
+        self.root.iconbitmap('assets/main-icon.ico')
 
         # Get screen width and height
         screen_width = root.winfo_screenwidth()
@@ -62,24 +64,35 @@ class UserPage():
         separator = tk.Canvas(root, width=2, bg='#5e5c5c', highlightthickness=0)
         separator.grid(row=0, column=1, rowspan=5, sticky="ns")
 
-        label = ttk.Label(widgets_frame, text="USER WINDOW", justify="left", font=('montserrat semibold', 13))
-        label.grid(row=0, column=0, pady=(2, 1), columnspan=2)
+        label = ttk.Label(widgets_frame, text="USER", anchor="ne", font=('montserrat semibold', 14))
+        label.grid(row=0, column=0, pady=2, columnspan=2)
+        
+        labell = ttk.Label(widgets_frame, text="Dashboard", anchor="ne", font=('montserrat semibold', 13))
+        labell.grid(row=1, column=0, columnspan=2)
 
         # Button for USB Enable
-        button = ttk.Button(widgets_frame, text="Enable USB", command=self.check_permissions, width=15)
+        button = ttk.Button(widgets_frame, text="Enable USB",style="Accent.TButton", command=self.check_permissions, cursor="hand2", width=15)
         button.grid(row=3, column=0, padx=10, pady=(30, 0), sticky="ew")
 
+        # Project Info Button
+        button1 = ttk.Button(widgets_frame, text="Project Info", style="Accent.TButton", command=self.project_info, width=15,cursor="hand2")
+        button1.grid(row=4, column=0, padx=10, pady=(20, 0), sticky="ew")
+
         # Logout Button
-        button = ttk.Button(widgets_frame, text="Logout", style="Accent.TButton", command=self.logout, width=15)
-        button.grid(row=4, column=0, padx=10, pady=(20, 2), sticky="ew")
+        button = ttk.Button(widgets_frame, text="Logout", style="Custom.TButton", command=self.logout, width=15, cursor="hand2",)
+        button.grid(padx=10, pady=(20, 0), sticky="ew")
 
         # User Analytics and Logs Label on the right side
-        analytics_label = ttk.Label(root, text="User Analytics and Logs", font=('montserrat', 11))
-        analytics_label.grid(row=0, column=2, pady=(40, 2), padx=(20,2), sticky="nsew")
+        uname = self.current_user.name
+        hello = ttk.Label(root, text=f"Hello {uname}!", font=('montserrat semibold', 12))
+        hello.grid(row=0, column=2, pady=(20, 2), padx=(20,2), sticky="nsew")
+
+        analytics_label = ttk.Label(root, text="User Analytics and Logs", font=('montserrat semibold', 10))
+        analytics_label.grid(row=1, column=2, pady=(20, 2), padx=(20,2), sticky="nsew")
 
         # Panedwindow
         paned = ttk.PanedWindow(root)
-        paned.grid(row=1, column=2, pady=(0, 5), sticky="nsew", rowspan=3)
+        paned.grid(row=2, column=2, pady=(0, 5), sticky="nsew", rowspan=3)
 
         # Pane #1
         pane_1 = ttk.Frame(paned)
@@ -106,7 +119,7 @@ class UserPage():
         for name, column in zip(names, columns):
             tree.heading(column, text=name)
 
-        logs = self.session.query(Log).join(User).filter(User.is_admin == False).all()
+        logs = self.session.query(Log).join(User).filter(User.username == self.current_user.username).all()
         for log in logs:
             tree.insert("", "end", values=(log.user.username, log.login, log.logout, log.duration, log.ip))
 
@@ -141,6 +154,13 @@ class UserPage():
         login_root = tk.Tk()
         LoginPage(login_root, self.session)
 
+    def project_info(self):
+        pdf_path = os.path.join("assets", "project_report.pdf")
+        if os.path.exists(pdf_path):
+            os.startfile(pdf_path)
+        else:
+            print(f"File not found: {pdf_path}")
+
     def check_permissions(self):
         chk_root = tk.Toplevel(self.root)
         Checks(chk_root, self.session, self.current_user)
@@ -154,6 +174,7 @@ class Checks:
         
         self.root.title("Enable USB")
         self.root.option_add("*tearOff", False)
+        self.root.iconbitmap('assets/main-icon.ico')
         
         # Get screen width and height
         screen_width = root.winfo_screenwidth()
@@ -171,8 +192,8 @@ class Checks:
         self.root.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
 
         # Separator Canvas
-        separator = tk.Canvas(self.root, width=2, bg='#5e5c5c', highlightthickness=0)
-        separator.grid(row=0, column=1, rowspan=3, sticky="ns")
+        # separator = tk.Canvas(self.root, width=2, bg='#5e5c5c', highlightthickness=0)
+        # separator.grid(row=0, column=1, rowspan=3, sticky="ns")
 
         self.root.columnconfigure(index=0, weight=1)
         self.root.columnconfigure(index=1, weight=0)
@@ -184,12 +205,12 @@ class Checks:
 
         button = ttk.Button(self.root, text="Check Location", width=20, command=self.fetch_user_location, style="ToggleButton")
         button.grid(row=0, column=0, padx=50, pady=20, sticky='W')
-        self.location_tick = ttk.Label(self.root, text="")
+        self.location_tick = ttk.Label(self.root, text="-")
         self.location_tick.grid(row=0, column=1, padx=10, pady=7, sticky='W')
 
         button = ttk.Button(self.root, text="Check Permission", width=20, command=self.retrieve_permission, style="ToggleButton")
         button.grid(row=1, column=0, padx=50, pady=20, sticky='W')
-        self.permission_tick = ttk.Label(self.root, text="")
+        self.permission_tick = ttk.Label(self.root, text="-")
         self.permission_tick.grid(row=1, column=1, padx=10, pady=7, sticky='W')
 
         button = ttk.Button(self.root, text="Enable USB", width=20, style="Accent.TButton", command=self.enable_usb)
@@ -213,11 +234,11 @@ class Checks:
         if self.location_data:
             print("Location data found:", self.location_data)
             messagebox.showinfo("User Location", f"User Location Received : {self.location_data['address']}", parent=self.root)
-            self.location_tick.config(text="✅✔️") if self.compare_location() else self.location_tick.config(text="❌")
+            self.location_tick.config(text="✔️") if self.compare_location() else self.location_tick.config(text="❌")
             return
         else:
             print("no res")
-            self.root.after(5000, self.poll_location)  # Poll every 5 seconds
+            self.root.after(1000, self.poll_location)  # Poll every 5 seconds
 
     def retrieve_permission(self):
         if self.user:
@@ -240,18 +261,23 @@ class Checks:
             return
 
         if self.user and self.compare_location() and self.user_permission:
+            # Specify the path to the .bat file
+            bat_file_path = os.path.join(os.path.dirname(os.getcwd()), "controllers", "unblock_usb.bat")
+            print(bat_file_path)
+            subprocess.run([bat_file_path], text=True)
             messagebox.showinfo("Enable USB", "USB Enabled Successfully", parent=self.root)
         else:
             messagebox.showerror("Enable USB", "Permission Denied or Location Mismatch", parent=self.root)
 
     def compare_location(self):
-        db_lat = float(self.user.latitude)
-        db_lon = float(self.user.longitude)
-        lat = float(self.location_data['latitude'])
-        lon = float(self.location_data['longitude'])
+        db_lat = round(float(self.user.latitude), 3)
+        db_lon = round(float(self.user.longitude), 3)
+        lat = round(float(self.location_data['latitude']), 3)
+        lon = round(float(self.location_data['longitude']), 3)
         print(db_lat, db_lon, lat, lon)
+        # print(type(db_lat), type(db_lon), type(lat), type(lon))
 
-        return round(db_lat, 3) == round(lat, 3) and round(db_lon, 3) == round(lon, 3)
+        return db_lat == lat and db_lon == lon
 
     class LocationHandler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -287,7 +313,7 @@ class Checks:
                     self.send_response(200)
                     self.send_header('Content-type', 'text/html')
                     self.end_headers()
-                    with open('index.html', 'rb') as file:
+                    with open('assets/index.html', 'rb') as file:
                         self.wfile.write(file.read())
                 else:
                     self.send_response(404)

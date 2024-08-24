@@ -1,15 +1,15 @@
 import tkinter as tk
-from tkinter import ttk
-import sv_ttk
+from tkinter import ttk, messagebox
+# import sv_ttk
+from PIL import Image, ImageTk
 from ..models.user import User
 import datetime
 from sqlalchemy.orm.exc import NoResultFound
 from ..models.user import Log, User
+import subprocess
 
 import os
 os.chdir(os.path.dirname(__file__))
-
-# Set the default directory to the assets folder
 default_dir = os.path.join(os.getcwd(), "assets")
 
 class AdminPage():
@@ -34,6 +34,7 @@ class AdminPage():
 
         # Set the geometry of the window
         root.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
+        self.root.iconbitmap('assets/main-icon.ico')
         
         # Use sv_ttk for a more modern look
         ttk.Style(self.root)
@@ -57,20 +58,20 @@ class AdminPage():
         sidebar.pack(side=tk.LEFT, fill=tk.Y)
 
         # Sidebar title
-        ttk.Label(sidebar, text="Dashboard", style="h1.TLabel", font=('montserrat semibold', 16)).pack(pady=10)
+        ttk.Label(sidebar, text="Dashboard", style="h1.TLabel", font=('montserrat semibold', 15)).pack(pady=10)
 
         # Sidebar buttons
         buttons = [
             ("Home", self.show_home),
             ("Analytics", self.show_analytics),
             ("Users", self.show_users),
-            ("Settings", self.show_settings)
+            ("Project Info.", self.show_settings)
         ]
 
         for text, command in buttons:
             ttk.Button(sidebar, text=text, command=command, style="Accent.TButton", width=10).pack(pady=5, padx=25, fill=tk.X)
 
-        ttk.Button(sidebar, text="Logout", command=self.logout, style="TButton", width=12).pack(pady=(6,50), padx=25, fill=tk.X)
+        ttk.Button(sidebar, text="Logout", command=self.logout, style="TButton", width=12).pack(pady=50, padx=25, fill=tk.X)
 
         # Divider frame
         divider = ttk.Frame(main_frame, style="Divider.TFrame")
@@ -85,15 +86,16 @@ class AdminPage():
 
     def show_home(self):
         self.clear_content()
-        ttk.Label(self.content, text="Welcome to the Admin Dashboard", style="h1.TLabel", font=('montserrat semibold', 14)).pack(pady=20)
-        ttk.Label(self.content, text="Here's an overview of your system:", style="TLabel", font=('montserrat', 12)).pack(pady=15)
+        ttk.Label(self.content, text="Welcome to the Admin Dashboard", style="h1.TLabel", font=('montserrat semibold', 14)).pack(pady=10)
+        # ttk.Label(self.content, text="Here's an overview of your system:", style="TLabel", font=('montserrat', 12)).pack(pady=15)
 
         # Sample stats
+        num_users = self.session.query(User).filter(User.is_admin == False).count()
+        num_admins = self.session.query(User).filter(User.is_admin == True).count()
         stats = [
-            ("Total Users", "1,234"),
-            ("Active Sessions", "56"),
-            ("Server Load", "23%"),
-            ("Disk Usage", "45%")
+            ("Total Users", num_users),
+            ("Total Admins", num_admins),
+            ("Total Activity", "1 Hr. 46 Minutes"),
         ]
 
         for title, value in stats:
@@ -102,9 +104,23 @@ class AdminPage():
             ttk.Label(frame, text=title, style="TLabel").pack(side=tk.LEFT, padx=10)
             ttk.Label(frame, text=value, style="h2.TLabel").pack(side=tk.RIGHT, padx=10)
 
+        ttk.Button(self.content, text="Block the USB Ports", command=self.block, style="Toggle.TButton", width=20).pack(pady=10, padx=25, anchor="w")
+        ttk.Button(self.content, text="Unblock the USB Ports", command=self.unblock, style="Toggle.TButton", width=20).pack(pady=10, padx=25, anchor="w")
+    
+    def block(self):
+        bat_file_path = os.path.join(os.path.dirname(os.getcwd()), "controllers", "block_usb.bat")
+        print(bat_file_path)
+        subprocess.run([bat_file_path], text=True)
+        messagebox.showinfo("Enable USB", "USB Blocked Successfully", parent=self.root)
+
+    def unblock(self):
+        bat_file_path = os.path.join(os.path.dirname(os.getcwd()), "controllers", "unblock_usb.bat")
+        subprocess.run([bat_file_path], text=True)
+        messagebox.showinfo("Disable USB", "USB Enabled Successfully", parent=self.root)
+
     def show_analytics(self):
         self.clear_content()
-        ttk.Label(self.content, text="Analytics and Logs", style="h1.TLabel").pack(pady=20)
+        ttk.Label(self.content, text="Analytics and Logs", style="h1.TLabel", font=('montserrat semibold', 14)).pack(pady=10)
         columns = ("user_id", "login", "logout", "duration", "ip")
         names = ("Username", "Login Time", "Logout Time", "Duration", "IP Address")
         tree = ttk.Treeview(self.content, columns=columns, show='headings')
@@ -124,7 +140,7 @@ class AdminPage():
 
     def show_users(self):
         self.clear_content()
-        ttk.Label(self.content, text="User Management", style="h1.TLabel").pack(pady=20)
+        ttk.Label(self.content, text="User Management", style="h1.TLabel", font=('montserrat semibold', 14)).pack(pady=10)
         
         # Create Treeview
         columns = ("name", "username", "email", "is_admin", "permitted", "permitted_from", "permitted_to", "location")
@@ -148,10 +164,10 @@ class AdminPage():
             location = f"({user.latitude}, {user.longitude})"
             tree.insert("", "end", values=(user.name, user.username, user.email, user.is_admin, user.permitted, user.permitted_from, user.permitted_to, location))
         
-        tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+        tree.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
         
         # Add user button
-        ttk.Button(self.content, text="Add User", command=self.add_user_form).pack(pady=20)
+        ttk.Button(self.content, text="Add User", command=self.add_user_form).pack(pady=10)
 
     def delete_user(self, user):
         # Delete user from the database
@@ -217,8 +233,23 @@ class AdminPage():
 
     def show_settings(self):
         self.clear_content()
-        ttk.Label(self.content, text="Settings", style="h1.TLabel").pack(pady=20)
-        ttk.Label(self.content, text="Various settings options would be displayed here.", style="TLabel").pack()
+        ttk.Label(self.content, text="Project Information", style="h1.TLabel", font=('montserrat semibold', 14)).pack(pady=10)
+        image = Image.open("assets/Dev.jpg")
+        image = image.resize((510, 270))
+        photo = ImageTk.PhotoImage(image)
+
+        # Create a label and display the image
+        label = ttk.Label(self.content, image=photo)
+        label.image = photo 
+        label.pack()
+        ttk.Button(self.content, text="View Project Report", command=self.open_pdf, style="Accent.TButton", width=24).pack(pady=15, padx=15)
+
+    def open_pdf(self):
+        pdf_path = os.path.join("assets", "project_report.pdf")
+        if os.path.exists(pdf_path):
+            os.startfile(pdf_path)
+        else:
+            print(f"File not found: {pdf_path}")
 
     def clear_content(self):
         for widget in self.content.winfo_children():

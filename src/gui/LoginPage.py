@@ -19,8 +19,8 @@ class LoginPage:
         self.session = session
         self.root = root
         self.root.title("User Login")
-        self.root.option_add("*tearOff", False) # This is always a good idea
-        self.root.iconbitmap('assets/main-icon.ico')
+        self.root.option_add("*tearOff", False)
+        self.root.iconbitmap('assets/check.ico')
 
         # Get screen width and height
         screen_width = root.winfo_screenwidth()
@@ -81,8 +81,8 @@ class LoginPage:
         self.password_entry.grid(row=5, column=0, padx=5, pady=(0, 10), sticky="ew")
 
         # Login button with Custom Styles
-        style = ttk.Style()
-        style.configure("Custom.TButton", font=("Montserrat Bold", 12), background="#4CAF50", foreground="white")
+        Style = ttk.Style()
+        Style.configure(style="Custom.TButton", font=("Montserrat Bold", 12), background="#4CAF50", foreground="white")
         
         login_button = ttk.Button(widgets_frame, text="Login", style="Custom.TButton", cursor="hand2", command=self.login, takefocus=True)
         login_button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
@@ -93,15 +93,15 @@ class LoginPage:
         photo = ImageTk.PhotoImage(image)
 
         image_label = ttk.Label(root, image=photo)
-        image_label.image = photo  # Keep a reference to avoid garbage collection
+        image_label.image = photo                # Keep a reference to avoid garbage collection
         image_label.grid(row=0, column=0, sticky="sew", rowspan=2)
 
-        # # Sizegrip
+        # Sizegrip
         # sizegrip = ttk.Sizegrip(self.root)
-        # sizegrip.grid(row=100, column=100, padx=(0, 5), pady=(0, 5))
+        # sizegrip.grid(row=99, column=100, padx=(0, 5), pady=(0, 5))
 
-        # Set a minsize for the window, and place it in the middle
         self.root.update()
+        self.root.mainloop()
 
     def login(self):
         username = self.username_entry.get()
@@ -138,4 +138,4 @@ class LoginPage:
         user_root = tk.Tk()
         UserPage(user_root, self.session, user)
 
-        # self.root.mainloop()
+    

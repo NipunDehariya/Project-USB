@@ -2,6 +2,8 @@ from sqlalchemy import create_engine, Column, String, Boolean, DateTime, Foreign
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import uuid
+import datetime
+import os
 
 # Define the base class for the model
 Base = declarative_base()
@@ -58,7 +60,9 @@ class Log(Base):
     user = relationship("User", back_populates="logs")
 
 # Create an SQLite database
-engine = create_engine('sqlite:///users.db')
+db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'users.db')
+# Alternative! db_path = Path(__file__).resolve().parents[2] / 'users.db'
+engine = create_engine(f'sqlite:///{db_path}')
 Base.metadata.create_all(bind=engine)
 
 # Create a session
@@ -113,15 +117,15 @@ def delete_user(username):
 #     longitude='24.567'
 # )
 # add_user(
-#     name='Aditya',
-#     username='user2',
+#     name='Raj',
+#     username='user4',
 #     password='user123',
-#     email='user@email.com',
+#     email='user3@email.com',
 #     is_admin=False,
-#     permitted=False,
-#     permitted_from=datetime.now(),
-#     permitted_to=datetime.now(),
-#     latitude='23.456',
-#     longitude='24.567'
+#     permitted=True,
+#     permitted_from=datetime.datetime.now(),
+#     permitted_to=datetime.datetime.now(),
+#     latitude='23.255',
+#     longitude='77.400'
 # )
 
