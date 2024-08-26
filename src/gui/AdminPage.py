@@ -1,11 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import webbrowser
 # import sv_ttk
 from PIL import Image, ImageTk
 from ..models.user import User
 import datetime
 from sqlalchemy.orm.exc import NoResultFound
 from ..models.user import Log, User
+from ..controllers import control
 import subprocess
 
 import os
@@ -108,14 +110,11 @@ class AdminPage():
         ttk.Button(self.content, text="Unblock the USB Ports", command=self.unblock, style="Toggle.TButton", width=20).pack(pady=10, padx=25, anchor="w")
     
     def block(self):
-        bat_file_path = os.path.join(os.path.dirname(os.getcwd()), "controllers", "block_usb.bat")
-        print(bat_file_path)
-        subprocess.run([bat_file_path], text=True)
+        control.block()
         messagebox.showinfo("Enable USB", "USB Blocked Successfully", parent=self.root)
 
     def unblock(self):
-        bat_file_path = os.path.join(os.path.dirname(os.getcwd()), "controllers", "unblock_usb.bat")
-        subprocess.run([bat_file_path], text=True)
+        control.unblock()
         messagebox.showinfo("Disable USB", "USB Enabled Successfully", parent=self.root)
 
     def show_analytics(self):
@@ -242,7 +241,13 @@ class AdminPage():
         label = ttk.Label(self.content, image=photo)
         label.image = photo 
         label.pack()
-        ttk.Button(self.content, text="View Project Report", command=self.open_pdf, style="Accent.TButton", width=24).pack(pady=15, padx=15)
+
+        # Create a frame to hold the buttons
+        button_frame = ttk.Frame(self.content)
+        button_frame.pack(pady=15, padx=15)
+
+        ttk.Button(button_frame, text="View Project Report", command=self.open_pdf, style="Accent.TButton", width=24).grid(row=0, column=0, padx=5)
+        ttk.Button(button_frame, text="GitHub", command=self.open_gh, style="Accent.TButton", width=24).grid(row=0, column=1, padx=5)
 
     def open_pdf(self):
         pdf_path = os.path.join("assets", "project_report.pdf")
@@ -250,6 +255,9 @@ class AdminPage():
             os.startfile(pdf_path)
         else:
             print(f"File not found: {pdf_path}")
+
+    def open_gh(self):
+        webbrowser.open("https://www.github.com/satvikx/Project-USB")
 
     def clear_content(self):
         for widget in self.content.winfo_children():

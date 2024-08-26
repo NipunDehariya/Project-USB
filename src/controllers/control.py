@@ -1,57 +1,28 @@
-import tkinter as tk
-from tkinter import messagebox
 import subprocess
 import os
+import ctypes
+import sys
 
-def disable_usb():
-    password_window = tk.Toplevel()
-    password_window.title("Enter Password")
-    password_window.geometry("300x100")
-    password_window.resizable(False, False)
-    password_label = tk.Label(password_window, text="Enter Password:")
-    password_label.pack()
-    password_entry = tk.Entry(password_window, show="*") 
-    password_entry.pack()
+# Path to the batch files
+# block_path = "block_usb.bat"
+# unblock_path = "unblock_usb.bat"
 
-    def check_password():
-        if password_entry.get() == "password":
-            subprocess.run([r'block_usb.bat'], text=True)
-            messagebox.showinfo("Success", "USB Disabled Successfully")
-            password_window.destroy()
-        else:
-            error_label = tk.Label(password_window, text="Incorrect password")
-            # messagebox.showerror("Error", "Incorrect password") 
-            password_entry.delete(0, 'end')
+block_path = os.path.join(os.path.dirname(__file__), "block_usb.bat_Shortcut.lnk")
+unblock_path = os.path.join(os.path.dirname(__file__), "unblock_usb.bat_Shortcut.lnk")
 
 
+def run_as_admin(batch_file_path):
+    os.startfile (batch_file_path)
 
-    #Move these guys to the gui code
-    check_password = tk.Button(password_window, text="Submit", command=check_password)
-    check_password.pack()
-    error_label = tk.Label(password_window, text="", font=("Arial", 10), bg="red", fg="white")
-    error_label.pack()
+def block():
+    try:
+        run_as_admin(block_path)
+    except Exception as e:
+        print("Error", str(e))
 
-
-def enable_usb():
-    password_window = tk.Toplevel()
-    password_window.title("Enter Password")
-    password_window.geometry("300x100")
-    password_window.resizable(False, False)
-    password_label = tk.Label(password_window, text="Enter Password:")
-    password_label.pack()
-    password_entry = tk.Entry(password_window, show="*") 
-    password_entry.pack()
-
-    def check_password():
-        if password_entry.get() == "password":
-            subprocess.run([r'unblock_usb.bat'], text=True)
-            messagebox.showinfo("Success", "USB Enabled Successfully")
-            password_window.destroy()
-        else:
-            error_label = tk.Label(password_window, text="Incorrect password")
-            # messagebox.showerror("Error", "Incorrect password") 
-            password_entry.delete(0, 'end')
-    
-    check_password = tk.Button(password_window, text="Submit", command=check_password)
-    check_password.pack()
-    error_label = tk.Label(password_window, text="", font=("Arial", 10), bg="red", fg="white")
+def unblock():
+    try:
+        run_as_admin(unblock_path)
+    except Exception as e:
+        print("Error", str(e))
+        
